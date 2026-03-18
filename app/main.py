@@ -15,19 +15,31 @@ transform = transforms.Compose([
 train_dataset = datasets.MNIST(root='./data', train=True, transform=transform, download=True)
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=64, shuffle=True)
 
-#Define simple neural network
+#Define CNN with Conv2d
 class MNISTModel(nn.Module):
     def __init__(self):
         super().__init__()
-        self.model = nn.Sequential(
-            nn.Flatten(),
-            nn.Linear(28*28, 128),
-            nn.ReLU(),
-            nn.Linear(128, 10)
-        )
+        self.conv1 = nn.Conv2d(1, 32, kernel_size=5, padding=2)
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=5, padding=2)
+        self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
+        self.flatten = nn.Flatten()
+        self.fc1 = nn.Linear(64 * 7 * 7, 128)
+        self.fc2 = nn.Linear(128, 10)
+        self.relu = nn.ReLU()
 
     def forward(self, x):
-        x = self.model(x)
+        x = self.conv1(x)
+        x = self.relu(x)
+        x = self.pool(x)
+        
+        x = self.conv2(x)
+        x = self.relu(x)
+        x = self.pool(x)
+        
+        x = self.flatten(x)
+        x = self.fc1(x)
+        x = self.relu(x)
+        x = self.fc2(x)
         return x
     
 model = MNISTModel().to(device)
@@ -43,9 +55,9 @@ for epoch in range(epochs):
     total_loss = 0
 
     for images, labels in train_loader:
-        imgaes, labels = images.to(device), labels.to(device)
+        images, labels = images.to(device), labels.to(device)
 
-        outputs = model(imgaes)
+        outputs = model(images)
         loss = criterion(outputs, labels)
 
         optimizer.zero_grad()
