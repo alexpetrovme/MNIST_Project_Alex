@@ -58,7 +58,8 @@ optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 # training loop
 epochs = 7
-epoch_losses = []
+train_losses = []
+val_losses = []
 
 for epoch in range(epochs):
     # Training phase
@@ -88,20 +89,23 @@ for epoch in range(epochs):
             loss = criterion(outputs, labels)
             val_loss += loss.item()
 
-    epoch_losses.append(train_loss)
-    print(f"Epoch {epoch+1}, Loss: {train_loss:.4f}")
+    train_losses.append(train_loss)
+    val_losses.append(val_loss)
+    print(f"Epoch {epoch+1}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}")
 
     # Save model
 torch.save(model.state_dict(), "../model/mnist_model.pth")
 
 print("Model saved as mnist_model.pth")
 
-# Visualize training loss
+# Visualize training and validation loss
 plt.figure(figsize=(10, 6))
-plt.plot(range(1, epochs+1), epoch_losses, marker='o', linewidth=2, markersize=8)
+plt.plot(range(1, epochs+1), train_losses, marker='o', linewidth=2, markersize=8, label='Train Loss')
+plt.plot(range(1, epochs+1), val_losses, marker='s', linewidth=2, markersize=8, label='Val Loss')
 plt.xlabel('Epoch', fontsize=12)
 plt.ylabel('Loss', fontsize=12)
-plt.title('Training Loss Over Epochs', fontsize=14)
+plt.title('Training and Validation Loss Over Epochs', fontsize=14)
+plt.legend(fontsize=11)
 plt.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.savefig('../model/training_loss.png')
