@@ -23,6 +23,10 @@ train_dataset, val_dataset = torch.utils.data.random_split(full_dataset, [train_
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=64, shuffle=True)
 val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=64, shuffle=False)
 
+#Load test dataset
+test_dataset = datasets.MNIST(root='./data', train=False, transform=transform, download=True)
+test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=64, shuffle=False)
+
 #Define CNN with Conv2d
 class MNISTModel(nn.Module):
     def __init__(self):
@@ -89,14 +93,9 @@ for epoch in range(epochs):
             loss = criterion(outputs, labels)
             val_loss += loss.item()
 
-<<<<<<< HEAD
-    epoch_losses.append(train_loss)
-    print(f"Epoch {epoch+1}, Loss: {train_loss:.4f}")
-=======
     train_losses.append(train_loss)
     val_losses.append(val_loss)
     print(f"Epoch {epoch+1}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}")
->>>>>>> e3e1a92375348c2b8bd54e8007d8b70a6e1c8d09
 
     # Save model
 torch.save(model.state_dict(), "../model/mnist_model.pth")
@@ -117,3 +116,28 @@ plt.savefig('../model/training_loss.png')
 plt.show()
 
 print("Training graph saved as training_loss.png")
+
+# Test the model on test dataset
+print("\n" + "="*50)
+print("Testing on Test Dataset")
+print("="*50)
+
+model.eval()
+test_loss = 0
+correct = 0
+total = 0
+
+with torch.no_grad():
+    for images, labels in test_loader:
+        images, labels = images.to(device), labels.to(device)
+        outputs = model(images)
+        loss = criterion(outputs, labels)
+        test_loss += loss.item()
+        
+        _, predicted = torch.max(outputs.data, 1)
+        total += labels.size(0)
+        correct += (predicted == labels).sum().item()
+
+test_accuracy = 100 * correct / total
+print(f"Test Loss: {test_loss:.4f}")
+print(f"Test Accuracy: {test_accuracy:.2f}%")
