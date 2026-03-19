@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torchvision import datasets, transforms
+import matplotlib.pyplot as plt
 
 #Device (CPU or GPU)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -56,7 +57,8 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 # training loop
-epochs = 3
+epochs = 7
+epoch_losses = []
 
 for epoch in range(epochs):
     # Training phase
@@ -86,9 +88,23 @@ for epoch in range(epochs):
             loss = criterion(outputs, labels)
             val_loss += loss.item()
 
-    print(f"Epoch {epoch+1}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}")
+    epoch_losses.append(total_loss)
+    print(f"Epoch {epoch+1}, Loss: {total_loss:.4f}")
 
     # Save model
 torch.save(model.state_dict(), "../model/mnist_model.pth")
 
 print("Model saved as mnist_model.pth")
+
+# Visualize training loss
+plt.figure(figsize=(10, 6))
+plt.plot(range(1, epochs+1), epoch_losses, marker='o', linewidth=2, markersize=8)
+plt.xlabel('Epoch', fontsize=12)
+plt.ylabel('Loss', fontsize=12)
+plt.title('Training Loss Over Epochs', fontsize=14)
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.savefig('../model/training_loss.png')
+plt.show()
+
+print("Training graph saved as training_loss.png")
