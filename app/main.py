@@ -88,8 +88,8 @@ for epoch in range(epochs):
             loss = criterion(outputs, labels)
             val_loss += loss.item()
 
-    epoch_losses.append(total_loss)
-    print(f"Epoch {epoch+1}, Loss: {total_loss:.4f}")
+    epoch_losses.append(train_loss)
+    print(f"Epoch {epoch+1}, Loss: {train_loss:.4f}")
 
     # Save model
 torch.save(model.state_dict(), "../model/mnist_model.pth")
