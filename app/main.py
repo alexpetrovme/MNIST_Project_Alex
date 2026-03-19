@@ -12,8 +12,15 @@ transform = transforms.Compose([
 ])
 
 #load dataset
-train_dataset = datasets.MNIST(root='./data', train=True, transform=transform, download=True)
+full_dataset = datasets.MNIST(root='./data', train=True, transform=transform, download=True)
+
+# Split into train and validation (80/20 split)
+train_size = int(0.8 * len(full_dataset))
+val_size = len(full_dataset) - train_size
+train_dataset, val_dataset = torch.utils.data.random_split(full_dataset, [train_size, val_size])
+
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=64, shuffle=True)
+val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=64, shuffle=False)
 
 #Define CNN with Conv2d
 class MNISTModel(nn.Module):
@@ -52,7 +59,9 @@ optimizer = optim.Adam(model.parameters(), lr=0.001)
 epochs = 3
 
 for epoch in range(epochs):
-    total_loss = 0
+    # Training phase
+    model.train()
+    train_loss = 0
 
     for images, labels in train_loader:
         images, labels = images.to(device), labels.to(device)
@@ -64,9 +73,20 @@ for epoch in range(epochs):
         loss.backward()
         optimizer.step()
 
-        total_loss += loss.item()
+        train_loss += loss.item()
 
-    print(f"Epoch {epoch+1}, Loss: {total_loss:.4f}")
+    # Validation phase
+    model.eval()
+    val_loss = 0
+    
+    with torch.no_grad():
+        for images, labels in val_loader:
+            images, labels = images.to(device), labels.to(device)
+            outputs = model(images)
+            loss = criterion(outputs, labels)
+            val_loss += loss.item()
+
+    print(f"Epoch {epoch+1}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}")
 
     # Save model
 torch.save(model.state_dict(), "../model/mnist_model.pth")
