@@ -3,11 +3,28 @@ import './App.css';
 
 function App() {
   const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [prediction, setPrediction] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const handleImageUpload = (e) => {
-    setImage(e.target.files[0]);
+    const file = e.target.files[0];
+    setImage(file);
+    
+    // Create preview
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRefresh = () => {
+    setImage(null);
+    setImagePreview(null);
+    setPrediction(null);
   };
 
   const handlePredict = async () => {
@@ -44,12 +61,22 @@ function App() {
     <div className="App">
       <h1>MNIST Digit Predictor</h1>
       <div className="container">
-        <input 
-          type="file" 
-          onChange={handleImageUpload} 
-          accept="image/*"
-        />
-        <button onClick={handlePredict} disabled={loading}>
+        <label className="file-input-label">
+          📁 Choose Image
+          <input 
+            type="file" 
+            onChange={handleImageUpload} 
+            accept="image/*"
+          />
+        </label>
+        
+        {imagePreview && (
+          <div className="preview">
+            <img src={imagePreview} alt="preview" />
+          </div>
+        )}
+        
+        <button onClick={handlePredict} disabled={loading || !image}>
           {loading ? 'Predicting...' : 'Predict'}
         </button>
         
@@ -57,6 +84,9 @@ function App() {
           <div className="result">
             <h2>Prediction: {prediction.prediction}</h2>
             <p>Confidence: {prediction.confidence}</p>
+            <button className="refresh-btn" onClick={handleRefresh}>
+              🔄 Try Another
+            </button>
           </div>
         )}
       </div>
