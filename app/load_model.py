@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image
 import io
 from torchvision import transforms
@@ -44,12 +45,26 @@ print("✅ Model loaded successfully")
 # Initialize FastAPI
 app = FastAPI()
 
+# Enable CORS - configure before routes
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://localhost:8000", "*"],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["*"],
+)
+
 # Transform for image preprocessing
 transform = transforms.Compose([
     transforms.Grayscale(num_output_channels=1),
     transforms.Resize((28, 28)),
     transforms.ToTensor()
 ])
+
+@app.options("/predict")
+async def preflight():
+    """Handle CORS preflight requests"""
+    return {}
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
