@@ -1,0 +1,21 @@
+# Core Dependencies for MNIST Project
+
+# PyTorch - Deep Learning Framework
+torch==2.0.1
+torchvision==0.15.2
+
+# FastAPI - Modern Python web framework for building APIs
+fastapi==0.104.1
+uvicorn==0.24.0
+
+# Image Processing
+pillow==10.0.1
+
+# Form data handling for file uploads
+python-multipart==0.0.6
+
+# Data visualization and plotting
+matplotlib==3.8.1
+
+# Optional: For better server performance
+# uvicorn[standard]
